@@ -21,6 +21,9 @@ class Code_001 {
     //第一种思路，转变成String for循环一个一个的替换
     fun reversal(x: Int): Int {
         var i = x
+        if (x > 7_463_847_412 || x < -8_463_847_412) return 0// 做个小小的优化
+        var maxArrayPositive = listOf<Int>(7, 4, 6, 3, 8, 4, 7, 4, 1, 2)
+        var maxArrayPNegative = listOf<Int>(8, 4, 6, 3, 8, 4, 7, 4, 1, 2)
         var max = 2_147_483_647
         var min = -2_147_483_648
         if (x == min) return 0
@@ -32,11 +35,22 @@ class Code_001 {
         var stf = StringBuffer(str)
 
         var len = stf.length //字符串长度
+
         var start = 0
         var end = len - 1
+        var flag = true
         do {
             var old_end = stf.get(end)
             var old_start = stf.get(start)
+
+            //-2147483412
+            if (flag && len == 10) {
+                when {
+                    old_end.toString().toInt() > maxArrayPositive.get(end) -> return 0
+                    old_end.toString().toInt() < maxArrayPositive.get(end) -> flag = false
+                }
+            }
+
             stf.replace(start, start + 1, old_end.toString())
             stf.replace(end, end + 1, old_start.toString())
             start++
@@ -77,7 +91,7 @@ class Code_001 {
     }
 
 
-    //
+    //想不到更好的方法了
     fun reversal3(x: Int): Int {
 
         return 0
@@ -88,10 +102,12 @@ class Code_001 {
 
 fun main(args: Array<String>) {
     //112455 反转后应该是 554211
-    var rev = Code_001().reversal2(2_147_483_647)
-    var rev2 = Code_001().reversal2(2_111_111_002)
-    var rev3 = Code_001().reversal2(-1)
+    var rev = Code_001().reversal(2_147_483_647)
+    var rev2 = Code_001().reversal(2_111_111_002)
+    var rev3 = Code_001().reversal(-1)
+    var rev4 = Code_001().reversal(-2147483412)
     println(rev)
     println(rev2)
     println(rev3)
+    println(rev4)
 }
