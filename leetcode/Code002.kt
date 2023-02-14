@@ -1,5 +1,7 @@
 package leetcode
 
+import kotlin.math.sin
+
 /**
  *
  * 请你来实现一个 myAtoi(string s) 函数，使其能将字符串转换成一个 32 位有符号整数（类似 C/C++ 中的 atoi 函数）。
@@ -77,7 +79,7 @@ class Code002 {
                 }
             }
             num = strNum //每次更新
-            if (num.startsWith("0")) firstIndex ++
+            if (num.startsWith("0")) firstIndex++
             end++
         } while (continueWhile && end < s.length + 1)
 
@@ -94,29 +96,92 @@ class Code002 {
         }
     }
 
+    //明显第一种方法问题很大，需要重新想想优化一下
+    fun myAtoi2(s: String): Int {
+        if (s.equals("") || s.equals(".")) return 0
+        var startIndex = 0
+        var endIndex = s.length
+
+        var start = 0
+        var end = s.length
+        while (start < end) {
+            var strStart = s.substring(start, start + 1)
+            var strEnd = s.substring(end - 1, end)
+            println("strStart = $strStart ||  strEnd = $strEnd")
+            //前面的
+            when {
+                //找到的是数字
+                strStart.equals("-?\\d+(\\.\\d+)?".toRegex()) -> {
+                    start = startIndex
+                }
+                //数字以外的东西
+                else -> {
+                    if (start < startIndex) {
+                        end = startIndex
+                        break
+                    }
+                }
+            }
+
+            //后面的
+            when {
+                //找到的是数字
+                strEnd.equals("-?\\d+(\\.\\d+)?".toRegex()) -> {
+                    end = endIndex
+                }
+                //数字以外的东西
+                else -> {
+                    end = endIndex - 1
+                }
+            }
+
+            startIndex++
+            endIndex--
+        }
+
+
+        var num: String = s.substring(start, end)
+        var i = if (start - 1 < 0) 0 else start - 1
+        var result = when (s.substring(i, start)) {
+            "-" -> -num.toLong()
+            "+" -> num.toLong()
+            else -> 0
+        }
+
+        when {
+            result <= Int.MIN_VALUE -> return Int.MIN_VALUE
+            result >= Int.MAX_VALUE -> return Int.MAX_VALUE
+            else -> return result.toInt()
+        }
+    }
 }
 
 
 fun main(args: Array<String>) {
-    println(Code002().myAtoi("ssfa452179hahoe"))
-    println(Code002().myAtoi("ssfa-343434343434hahoe"))
-    println(Code002().myAtoi("-343434343434hahoe"))
-    println(Code002().myAtoi("43434343434hahoe"))
-    println(Code002().myAtoi("434343sfad43434hahoe"))
-    println(Code002().myAtoi("words and 987"))
-    println(Code002().myAtoi("drewqeqwe333sdasd"))
-    println(Code002().myAtoi("a-333sdasd"))
-    println(Code002().myAtoi("--333sdasd"))
-    println(Code002().myAtoi("+-333sdasd"))
-    println(Code002().myAtoi("  333sdasd"))
-    println(Code002().myAtoi(" -333sdasd"))
-    println(Code002().myAtoi(" -42"))
-    println(Code002().myAtoi(" .-42"))
-    println(Code002().myAtoi("."))
-    println(Code002().myAtoi("1"))
-    println(Code002().myAtoi("-2"))
-    println(Code002().myAtoi("+2"))
-    println(Code002().myAtoi(""))
-    println(Code002().myAtoi("20000000000000000000"))
-    println(Code002().myAtoi("0000000000012345678"))
+    println(Code002().myAtoi2("ssfa452179hahoe"))
+    println("----------")
+    println(Code002().myAtoi2("ssfa-343434343434hahoe"))
+    println("----------")
+    println(Code002().myAtoi2("-343434343434hahoe"))
+    println("----------")
+    println(Code002().myAtoi2("43434343434hahoe"))
+    println("----------")
+    println(Code002().myAtoi2("434343sfad43434hahoe"))
+    println("----------")
+//    println(Code002().myAtoi2("words and 987"))
+//    println(Code002().myAtoi2("drewqeqwe333sdasd"))
+//    println(Code002().myAtoi2("a-333sdasd"))
+//    println(Code002().myAtoi2("--333sdasd"))
+//    println(Code002().myAtoi2("+-333sdasd"))
+//    println(Code002().myAtoi2("  333sdasd"))
+//    println(Code002().myAtoi2(" -333sdasd"))
+//    println(Code002().myAtoi2(" -42"))
+//    println(Code002().myAtoi2(" .-42"))
+//    println(Code002().myAtoi2("."))
+//    println(Code002().myAtoi2("1"))
+//    println(Code002().myAtoi2("-2"))
+//    println(Code002().myAtoi2("+2"))
+//    println(Code002().myAtoi2(""))
+//    println(Code002().myAtoi2("20000000000000000000"))
+//    println(Code002().myAtoi2("0000000000012345678"))
 }
