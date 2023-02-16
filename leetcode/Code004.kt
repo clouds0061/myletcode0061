@@ -20,29 +20,58 @@ class Code004 {
     }
 
     fun isMatch(s: String, p: String): Boolean {
-        var stf = StringBuffer(p)
-        var stf2 = StringBuffer(s)
+        var stf = StringBuffer(s)
+        var stf2 = StringBuffer(p)
+        var size = 0
         return when {
             p == ".*" -> true
             p.contains("*") -> {
-                if (s.length != p.replace("*", "", true).length) return false//长度不同肯定不能匹配
                 var indexP = 0
+                var indexS = 0
                 do {
-                    var string = stf2.substring(indexP, indexP + 1)
-                    if (stf2.substring(indexP, indexP + 2).contains("*")) {
-                        indexP += 2
-                    } else {
-                        indexP ++
-                    }
-
-                    for1@ for (str in stf) {
-                        if (!str.equals(string)) {
-                            break@for1
+                    var stringS = stf.substring(indexS, indexS + 1)
+                    var stringP = stf2.substring(indexP, indexP + 1)
+//                    println("strings = $stringS , stringP = $stringP")
+                    var end = if (indexP + 2 <= stf2.length) indexP + 2 else indexP + 1
+                    if (stf2.substring(indexP, end).contains("*")) {
+                        if (stringS == stringP) {
+                            indexS++
+                            size++
                         }
+                        else indexP += 2
+                    } else {
+                        if (stringP == ".") {
+                            indexS++
+                            indexP++
+                            size++
+                        } else if (stringS == stringP) {
+                            indexS++
+                            indexP++
+                        } else return false
                     }
+                } while (indexP < stf2.length && indexS < stf.length)
+                if (size < stf.length) return false//说明s中还有字符没有比对完，说明不能匹配
+                return true
+            }
+            p.contains(".") && !p.contains("*") -> {
+                var indexP = 0
+                var indexS = 0
+                do {
+                    var stringS = stf.substring(indexS, indexS + 1)
+                    var stringP = stf2.substring(indexP, indexP + 1)
+                    if (stringP == ".") {
+                        indexS++
+                        indexP++
+                        size++
+                    } else if (stringS == stringP) {
+                        indexS++
+                        indexP++
+                        size++
+                    } else return false
 
-                } while (indexP < stf2.length)
-                return stf2.toString() == stf.toString()
+                } while (indexP < stf2.length && indexS < stf.length)
+                if (size < stf.length) return false//说明s中还有字符没有比对完，说明不能匹配
+                return true
             }
             else -> s == p
         }
@@ -59,10 +88,21 @@ fun main(args: Array<String>) {
 //    println("${code.isMatch("aa","a*")}")
 //    println("-----------------")
 //    println("${code.isMatch("abc","")}")
-    println("-----------------")
+//    println("-----------------")
 //    println("${code.isMatch("abc","e*f*c")}")
-    println("-----------------")
+//    println("-----------------")
 //    println("${code.isMatch("abc","e*a*c")}")
-    println("${code.isMatch("aab", "c*a*b")}")//"aab" "c*a*b"
-    println("-----------------")
+//    println("${code.isMatch("aab", "c*a*b")}")//"aab" "c*a*b"
+//    println("-----------------")
+//    println("${code.isMatch("aa", "a*")}")//"aab" "c*a*b"
+//    println("-----------------")
+    println("${code.isMatch("mississippi", "mis*is*ip*.")}")//"mi ss i ss i pp i" "mi s* i s* i p* ."
+    println("${code.isMatch("mississippi", "mis*is*p*.")}")//"mi ss i ss i pp i" "mi s* i s*  p* ."
+////    println("-----------------")
+    println("${code.isMatch("aaa", "a.a")}")//"aaa" "a.a"
+//    println("-----------------")
+    println("${code.isMatch("aa", "a*")}")//"aaa" "a.a"
+    println("${code.isMatch("aa", ".")}")//"aaa" "a.a"
+
+
 }
