@@ -84,9 +84,11 @@ class Code004 {
     /**
      * 不行 上面那个方法，写的我自己都已经想不清楚了 重新向重新写
      */
-    fun isMatch(s: String, p: String): Boolean {
+    fun isMatch3(s: String, p: String): Boolean {
         var stfS = StringBuffer(s)
         var stfP = StringBuffer(p)
+        var s = p.replace("*", "")
+        var difference = if (stfS.length - s.length > 0) stfS.length - s.length else 0//获取差值
         when {
             //含有 '.' 或者 '*' 需要处理
             p.equals(".*") -> return true
@@ -100,7 +102,8 @@ class Code004 {
                     var endP = if (startP + 2 > p.length) startP + 1 else startP + 2
                     var string = stfP.substring(startP, endP)
                     if (string.contains("*")) {
-                        if (stringP.equals(".") || strings == stringP) {
+                        if ((stringP.equals(".") || strings == stringP) && difference > 0) {
+                            difference--
                             startS++
                         } else {
                             startP += 2
@@ -125,6 +128,85 @@ class Code004 {
         return s.matches(p.toRegex())
     }
 
+    /***
+     * 写着写着 人又傻了，写的太复杂了 ，不行重新想  rua圾
+     *
+     * 这次的想法是把每个单词的数量统计一下，合并相同的，按顺序比较字母和数量  字母相同且p的数量大于等于s那说明能匹配   我觉得我得想法很好，就是代码能力有点弱啊
+     */
+    fun isMatch(s: String, p: String): Boolean {
+        var stfS = StringBuffer(s)
+        var stfP = StringBuffer(p)
+        var listMap = ArrayList<HashMap<String, Int>>()
+        var mapString = HashMap<String, Int>()
+        when {
+            //含有 '.' 或者 '*' 需要处理
+            p == ".*" -> return true
+            p.contains("*") -> {
+                var sLen = stfS.length
+                var pLen = stfP.length
+
+                var index = 0
+                var lastP = ""
+                while (index < stfP.length) {
+                    var pString = stfP.substring(index, index + 1)
+                    var end = if (index + 2 >= stfP.length) stfP.length else index + 2
+                    var string = stfP.substring(index, end)
+                    var mapStringS = HashMap<String, Int>()
+                    if (string.contains("*")) {
+                        for (j in 0 until sLen) {
+                            var sString = stfS.substring(j, j + 1)
+                            if (mapStringS.contains(sString)) {
+                                var num = mapStringS.get(sString)
+                                num = num!! + 1
+                                mapStringS.put(sString, num)
+                            } else mapStringS.put(sString, 1)
+
+                            if (pString == "." || sString == pString) {
+                                if (mapString.contains(sString)) {
+                                    var num = mapString.get(sString)
+                                    num = num!! + 1
+                                    mapString.put(sString, num)
+                                } else mapString.put(sString, 1)
+                            }
+                        }
+                        index += 2
+                    } else {
+                        mapString.put(pString, 1)
+                        index++
+                    }
+                    if (listMap.size > 0) {
+                        var lastMap = listMap.get(listMap.size - 1)
+                        var num = lastMap.get(lastP)
+                        if (num == null) num = 0
+                        if (lastP == pString && !pString.equals(".")) num =
+                            num?.plus(mapString.get(lastP)!!)
+                        if (num != null) {
+                            mapString.put(lastP, num)
+                        }
+                    }
+                    listMap.add(mapString)
+                    lastP = pString
+                }
+
+
+
+                println("listMap = ${listMap.toString()} listMapS = ${mapString.toString()}")
+
+//                for (i in 0 until listMap.size) {
+//                    var keys = listMapS.get(i).keys
+//                    var keyp = listMap.get(i).keys
+//                    var ss = listMapS.get(i).get(keys.first())
+//                    var sp = listMap.get(i).get(keyp.first())
+//
+//                    return (keys != keyp) || ss!! > sp!!
+//                }
+                return true
+
+            }
+            else -> return s == p
+        }
+    }
+
 }
 
 fun main(args: Array<String>) {
@@ -145,28 +227,28 @@ fun main(args: Array<String>) {
 //    println("-----------------")
 //    println("${code.isMatch("aa", "a*")}")//"aab" "c*a*b"
 //    println("-----------------")
-    println(
-        "${
-            code.isMatch(
-                "mississippi",
-                "mis*is*ip*."
-            )
-        }"
-    )//"mi ss i ss i pp i" "mi s* i s* i p* ."
-    println(
-        "${
-            code.isMatch(
-                "mississippi",
-                "mis*is*p*."
-            )
-        }"
-    )//"mi ss i ss i pp i"   "mi s* i s*  p* ."
+//    println(
+//        "${
+//            code.isMatch(
+//                "mississippi",
+//                "mis*is*ip*."
+//            )
+//        }"
+//    )//"mi ss i ss i pp i" "mi s* i s* i p* ."
+//    println(
+//        "${
+//            code.isMatch(
+//                "mississippi",
+//                "mis*is*p*."
+//            )
+//        }"
+//    )//"mi ss i ss i pp i"   "mi s* i s*  p* ."
+//////    println("-----------------")
+//    println("${code.isMatch("aaa", "a.a")}")//"aaa" "a.a"
 ////    println("-----------------")
-    println("${code.isMatch("aaa", "a.a")}")//"aaa" "a.a"
-//    println("-----------------")
-    println("${code.isMatch("aa", "a*")}")//"aaa" "a.a"
-    println("${code.isMatch("aa", ".")}")//"aaa" "a.a"
-    println("${code.isMatch("abcd", "d*")}")//"aaa" "a.a"
+//    println("${code.isMatch("aa", "a*")}")//"aaa" "a.a"
+//    println("${code.isMatch("aa", ".")}")//"aaa" "a.a"
+//    println("${code.isMatch("abcd", "d*")}")//"aaa" "a.a"
     println("${code.isMatch("ab", ".*c")}")//"aaa" "a.a"
 
 
