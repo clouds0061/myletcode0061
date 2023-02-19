@@ -133,7 +133,7 @@ class Code004 {
      *
      * 这次的想法是把每个单词的数量统计一下，合并相同的，按顺序比较字母和数量  字母相同且p的数量大于等于s那说明能匹配   我觉得我得想法很好，就是代码能力有点弱啊
      */
-    fun isMatch(s: String, p: String): Boolean {
+    fun isMatch4(s: String, p: String): Boolean {
         var stfS = StringBuffer(s)
         var stfP = StringBuffer(p)
         var listMap = ArrayList<HashMap<String, Int>>()
@@ -207,24 +207,204 @@ class Code004 {
         }
     }
 
+    /**
+     * 新的算法  通过测试用例：331 / 354  最后几道测试用例了，但是肯定是过不了了， '.'完全处理不了，算法思路有问题.无法判断带‘。*’应该匹配多少个字符  感觉必须使用迭代，穷举出来，不然没办法比对
+     * 不行，写道最后卡住了  ‘。’ 处理不了啊
+     */
+    fun isMatch(s: String, p: String): Boolean {
+
+        when {
+            p == ".*" -> return true
+            !p.contains("*") && !p.contains(".") -> return s == p
+            else -> {
+                //合并s中相同的字母
+                var listS = ArrayList<ObjectS>()
+                var listP = ArrayList<ObjectP>()
+
+                var lastS = ""
+                for (i in s.indices) {
+                    var objectS: ObjectS? = null
+                    objectS = if (lastS == s[i].toString()) listS.last()
+                    else ObjectS()
+                    objectS.s = s[i].toString()
+                    objectS.num += 1
+
+                    if (lastS != s[i].toString()) listS.add(objectS)
+                    lastS = s[i].toString()
+                }
+
+                var lastP = ""
+                var lastPHasStart = false
+                for (i in p.indices) {
+                    //如果上个字符含有✳号 需要跳过一次
+                    if (lastPHasStart) {
+                        lastPHasStart = false
+                        continue
+                    }
+                    var objectP: ObjectP? = null
+                    objectP = if (lastP == p[i].toString()) listP.last()
+                    else ObjectP()
+
+                    var stringP = ""
+                    if (i + 2 <= p.length) stringP = p.substring(i, i + 2)
+                    objectP.p = p[i].toString()
+                    if (stringP.contains("*")) {
+                        objectP.minNum += 0
+                        objectP.hasStar = true
+                        lastPHasStart = true
+                    } else objectP.minNum += 1
+
+                    if (lastP != p[i].toString()) listP.add(objectP)
+                    lastP = p[i].toString()
+                }
+
+
+                //开始比较
+
+                for (i in listS.indices) {
+
+
+                }
+
+                var startS = 0
+                var startP = 0
+
+
+                var num = 0
+                for (i in listP.indices) {
+                    num += listP.get(i).minNum
+                }
+
+                if (s.length < num) return false//除开*号字符，多比s字符多，不符合
+
+                var lastLen = s.length - num //这是*号字符能补位的最大个数，每次补位后需要--
+
+//                println("listS = ${listS.toString()} , listP = ${listP.toString()}")
+                //aaaa  *aa.
+
+                while (true) {
+                    var objectS = listS[startS]
+                    var objectP = listP[startP]
+
+//                    println("s = ${objectS.s} , p = ${objectP.p} , num = $num")
+                    //不含*字符都不一样 肯定有问题 直接return
+                    if (!objectP.hasStar) {
+                        if (objectS.s != objectP.p && objectP.p != ".") return false
+                    } else {
+                        if (objectS.s != objectP.p && objectP.p != ".") {
+                            startP++
+                            //P走完了
+                            if (startP == listP.size)
+                                return startS == listS.size && listS.last().num == 0//S也需要走完，且字符数量已经消除完毕
+                            else
+                                continue
+                        }
+                    }
+
+
+                    //如果*号字符则不需要判断数量了，只需要lastLen减去差值
+                    if (objectP.hasStar) {
+                        if (objectS.num > objectP.minNum) {
+                            objectS.num -= objectP.minNum
+                            if (objectS.num > 0) {
+                                if (objectS.num - lastLen >= 0) {
+                                    objectS.num -= lastLen
+                                    lastLen = 0
+                                } else {
+                                    lastLen -= objectS.num
+                                    objectS.num = 0
+                                }
+                            }
+                            objectP.minNum = 0
+                        } else {
+                            objectP.minNum -= objectS.num
+                            objectS.num = 0
+                        }
+                    } else {
+                        if (objectS.num >= objectP.minNum) {
+                            objectS.num -= objectP.minNum
+                            objectP.minNum = 0
+                        } else {
+                            objectP.minNum -= objectS.num
+                            objectS.num = 0
+                        }
+                    }
+
+                    if (objectS.num == 0) startS++
+                    else if (objectS.num < 0) return false
+
+                    if (objectP.hasStar){
+                        if (objectP.minNum ==0 && lastLen == 0)startP++
+                    }else if (objectP.minNum == 0) startP++
+
+
+                    //S循环走完了
+                    if (startS == listS.size) {
+                        if (startP == listP.size) return true
+                        else {
+                            //剩下的如果都是 * 号字符那么匹配
+                            for (i in startP until listP.size) {
+                                if (listP[i].minNum == 0) continue
+                                else return false//否则不匹配
+                            }
+                            return true
+                        }
+                    }
+
+                    //P走完了
+                    if (startP == listP.size) {
+                        return startS == listS.size && listS.last().num == 0//S也需要走完，且字符数量已经消除完毕
+                    }
+                }
+            }
+        }
+    }
+
+    class ObjectP() {
+        var p = ""//字符
+        var minNum = 0//不含*的数量
+        var hasStar = false //是否含星号
+    }
+
+    class ObjectS {
+        var s = ""
+        var num = 0
+    }
+
+
+    /**
+     * 新算法，操，真的难啊:
+     * 如果优先比对不带*号的，然后截取剩下的再做比对
+     */
+    fun isMatch5(s: String, p: String): Boolean {
+        return true
+    }
 }
 
 fun main(args: Array<String>) {
     var code = Code004()
+    println("-------------aa bcbcbcaccbc aa bc/.* a*aa* .* b* . c* .* a* ----")
+    println("${code.isMatch("aabcbcbcaccbcaabc", ".*a*aa*.*b*.c*.*a*")}")
+//    println("-------------a caa bb accbbacaa bbbb/a* .* b* .* a* a a* a* ----")
+//    println("${code.isMatch("acaabbaccbbacaabbbb", "a*.*b*.*a*aa*a*")}")
+//    println("-------------abcdede/ab.*de----")
+//    println("${code.isMatch("abcdede", "ab.*de")}")
 //    println("-----------------")
-//    println("${code.isMatch("abc",".")}")
+//    println("${code.isMatch("abc", ".")}")
+    println("-----------------")
+//    println("${code.isMatch("ab", ".*..")}")
 //    println("-----------------")
-//    println("${code.isMatch("abc","c*")}")
+//    println("${code.isMatch("abc", "c*")}")
 //    println("-----------------")
-//    println("${code.isMatch("aa","a*")}")
+//    println("${code.isMatch("aa", "a*")}")
 //    println("-----------------")
-//    println("${code.isMatch("abc","")}")
+//    println("${code.isMatch("abc", "")}")
 //    println("-----------------")
-//    println("${code.isMatch("abc","e*f*c")}")
+//    println("${code.isMatch("abc", "e*f*c")}")
 //    println("-----------------")
-//    println("${code.isMatch("abc","e*a*c")}")
+//    println("${code.isMatch("abc", "e*a*c")}")
 //    println("${code.isMatch("aab", "c*a*b")}")//"aab" "c*a*b"
-//    println("-----------------")
+    println("-----------------")
 //    println("${code.isMatch("aa", "a*")}")//"aab" "c*a*b"
 //    println("-----------------")
 //    println(
@@ -249,7 +429,7 @@ fun main(args: Array<String>) {
 //    println("${code.isMatch("aa", "a*")}")//"aaa" "a.a"
 //    println("${code.isMatch("aa", ".")}")//"aaa" "a.a"
 //    println("${code.isMatch("abcd", "d*")}")//"aaa" "a.a"
-    println("${code.isMatch("ab", ".*c")}")//"aaa" "a.a"
+//    println("${code.isMatch("ab", ".*c")}")//"aaa" "a.a"
 
 
 }
