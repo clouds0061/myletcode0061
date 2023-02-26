@@ -31,7 +31,7 @@ nums[0] + nums[3] + nums[4] = (-1) + 2 + (-1) = 0 。
 class Code009ThreeNumSum {
     //-1,0,1,2,-1,-4]
     //-1 , -1 , 0 , 1 , 2 , 4
-    fun threeSum(nums: IntArray): List<List<Int>> {
+    fun threeSum1(nums: IntArray): List<List<Int>> {
         var list = ArrayList<ArrayList<Int>>()
         nums.sort()//排序
         if (nums[0] + nums[1] + nums[2] > 0) return list//最小的三个相加大于0
@@ -43,18 +43,21 @@ class Code009ThreeNumSum {
 
         var min = 0
         var max = nums.size - 1
+        var middle = min + 1
         while (true) {
-            var middle = min + 1
+            var left = min
+            var right = max
             for1@ for (i in middle until max) {
                 var sum = nums[min] + nums[i] + nums[max]
                 println("in for min = $min , i = $i , max = $max || sum = $sum")
                 when {
                     sum > 0 -> {
-                        max--
+
+                        left--
                         break@for1
                     }
                     sum < 0 -> {
-                        min++
+                        right++
                         break@for1
                     }
                     else -> {
@@ -63,31 +66,84 @@ class Code009ThreeNumSum {
                         ints.add(nums[i])
                         ints.add(nums[max])
                         if (!list.contains(ints))
-                        list.add(ints)
+                            list.add(ints)
 
-                        if (middle == min + 1 && middle == max - 1) return list
-                        if (i == max - 1) {
-                            min++
-                            max = nums.size - 1
-                        }
+
+                        break@for1
                     }
                 }
                 Thread.sleep(200)
             }
             Thread.sleep(200)
             println("in while min = $min , middle = $middle , max = $max")
-            if (middle == min + 1 && middle == max - 1) return list
+            println("----------")
         }
+    }
+
+    /**
+     * 上一种算法已经无以为继了
+     */
+    fun threeSum(nums: IntArray): List<List<Int>> {
+        var list = ArrayList<ArrayList<Int>>()
+        nums.sort()//排序
+        if (nums[0] + nums[1] + nums[2] > 0) return list//最小的三个相加大于0
+        if (nums[nums.size - 1] + nums[nums.size - 2] + nums[nums.size - 3] < 0) return list//最大的三个相加小于0
+
+        for (i in nums.indices) {
+            println("[ ${nums[i]} ]")
+        }
+
+        var min = 0
+        while (min < nums.size - 2) {
+            var max = nums.size - 1
+            var middle = min + 1
+            inner@ while (true) {
+                var sum = nums[min] + nums[middle] + nums[max]
+                println("inner ||  = $min , middle = $middle , max = $max || sum = $sum")
+                println("--------------------------------")
+                when {
+                    sum < 0 -> {
+                        middle++
+                    }
+                    sum > 0 -> {
+                        max--
+                    }
+                    else -> {
+                        var ints = ArrayList<Int>()
+                        ints.add(nums[min])
+                        ints.add(nums[middle])
+                        ints.add(nums[max])
+                        if (!list.contains(ints))
+                            list.add(ints)
+                        middle++
+                        max--
+                    }
+                }
+                if (middle >= max) break@inner
+            }
+            min++
+            println("outer ||  = $min , middle = $middle , max = $max")
+            println("==================================")
+        }
+        return list
     }
 }
 
 fun main() {
+    //[-1,0,1,2,-1,-4,-2,-3,3,0,4]
     var code = Code009ThreeNumSum()
     var list = arrayListOf<Int>()
+    list.add(-1)
+    list.add(0)
     list.add(1)
     list.add(2)
-    list.add(-2)
     list.add(-1)
+    list.add(-4)
+    list.add(-2)
+    list.add(-3)
+    list.add(3)
+    list.add(0)
+    list.add(4)
     println("最长 = ${code.threeSum(list.toIntArray())}")
 
 }
