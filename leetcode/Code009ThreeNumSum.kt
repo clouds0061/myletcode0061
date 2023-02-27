@@ -83,7 +83,7 @@ class Code009ThreeNumSum {
     /**
      * 上一种算法已经无以为继了
      */
-    fun threeSum(nums: IntArray): List<List<Int>> {
+    fun threeSum2(nums: IntArray): List<List<Int>> {
         var list = ArrayList<ArrayList<Int>>()
         nums.sort()//排序
         if (nums[0] + nums[1] + nums[2] > 0) return list//最小的三个相加大于0
@@ -127,11 +127,129 @@ class Code009ThreeNumSum {
         }
         return list
     }
+
+
+    fun threeSum3(nums: IntArray): List<List<Int>> {
+        var list = ArrayList<ArrayList<Int>>()
+        nums.sort()//排序
+        if (nums[0] + nums[1] + nums[2] > 0) return list//最小的三个相加大于0
+        if (nums[nums.size - 1] + nums[nums.size - 2] + nums[nums.size - 3] < 0) return list//最大的三个相加小于0
+
+        for (i in nums.indices) {
+            println("[ ${nums[i]} ]")
+        }
+
+        flag@ for (i in 0 until nums.size - 2) {
+            var j = i + 1
+            if (nums[i] + nums[j] > 0) continue
+            var k = nums.size - 1
+            while (j < nums.size - 1) {
+                var sum = nums[i] + nums[j] + nums[k]
+                if (sum > 0) {
+                    if (k == j + 1) {
+                        j++
+                        if (nums[i] + nums[j] > 0) continue@flag
+                        else k = nums.size - 1
+                    } else k--
+                }
+                if (sum < 0) {
+                    j++
+                    if (nums[i] + nums[j] > 0) continue@flag
+                    else k = nums.size - 1
+                }
+                if (sum == 0) {
+                    var ints = ArrayList<Int>()
+                    ints.add(nums[i])
+                    ints.add(nums[j])
+                    ints.add(nums[k])
+                    if (!list.contains(ints))
+                        list.add(ints)
+                    j++
+                    if (nums[i] + nums[j] > 0) continue@flag
+                    else k = nums.size - 1
+                }
+            }
+        }
+        return list
+    }
+
+
+    fun threeSum(nums: IntArray): List<List<Int>> {
+        var list = ArrayList<ArrayList<Int>>()
+        nums.sort()//排序
+        if (nums[0] + nums[1] + nums[2] > 0) return list//最小的三个相加大于0
+        if (nums[nums.size - 1] + nums[nums.size - 2] + nums[nums.size - 3] < 0) return list//最大的三个相加小于0
+
+        for (i in nums.indices) {
+            println("[ ${nums[i]} ]")
+        }
+
+        flag@ for (i in 0 until nums.size - 2) {
+            Thread.sleep(100)
+            println("while || i = $i")
+            println("------------------------------------------")
+            var j = i + 1
+            if (nums[i] + nums[j] > 0) continue
+            //0 1 2 3 4 5 6
+            var start = j
+            var end = nums.size - 1
+            var k = j + 1
+            k = start + if ((end - start) % 2 == 0) (end - start) / 2 else (end - start + 1) / 2
+            k = if (k == j) k + 1 else k
+
+
+            while (j < end) {
+                Thread.sleep(100)
+                if (j - 1 > i && nums[j - 1] == nums[j]) {
+                    j++
+                    continue
+                }
+                k = start + if ((end - start) % 2 == 0) (end - start) / 2 else (end - start + 1) / 2
+                k = if (k == j) k + 1 else k
+                var sum = nums[i] + nums[j] + nums[k]
+
+                println("while || i = $i , j = $j , k = $k , sum = $sum")
+                println("==================================")
+                println("start = $start , end = $end")
+                if (sum > 0) {
+                    end = k
+                }
+                if (sum < 0) {
+                    start = k
+                }
+                if (sum == 0) {
+                    var ints = ArrayList<Int>()
+                    ints.add(nums[i])
+                    ints.add(nums[j])
+                    ints.add(nums[k])
+                    if (!list.contains(ints))
+                        list.add(ints)
+                    j++
+                    start = j
+                    end = nums.size - 1
+
+                }
+                if (end - start == 1) {
+                    j++
+                    start = j
+                    end = nums.size - 1
+                }
+            }
+        }
+        return list
+    }
 }
 
 fun main() {
     //[-1,0,1,2,-1,-4,-2,-3,3,0,4]
     var code = Code009ThreeNumSum()
+    var list2 = arrayListOf<Int>()
+    list2.add(3)
+    list2.add(-2)
+    list2.add(1)
+    list2.add(0)
+    println("最长 = ${code.threeSum(list2.toIntArray())}")
+
     var list = arrayListOf<Int>()
     list.add(-1)
     list.add(0)
