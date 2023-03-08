@@ -333,9 +333,9 @@ class Code004 {
                     if (objectS.num == 0) startS++
                     else if (objectS.num < 0) return false
 
-                    if (objectP.hasStar){
-                        if (objectP.minNum ==0 && lastLen == 0)startP++
-                    }else if (objectP.minNum == 0) startP++
+                    if (objectP.hasStar) {
+                        if (objectP.minNum == 0 && lastLen == 0) startP++
+                    } else if (objectP.minNum == 0) startP++
 
 
                     //S循环走完了
@@ -379,34 +379,186 @@ class Code004 {
     fun isMatch5(s: String, p: String): Boolean {
         return true
     }
+
+    /**
+     * 回溯算法
+     * 写的稀烂
+     * 哈哈哈哈 我以为我了解了回溯算法和动态规划就无敌了，做题了才发现我还是个弟弟
+     */
+    var matchable = false
+    var matchLen = 0
+    fun backTrack(i: Int, j: Int, s: String, p: String) {
+        if (i >= s.length && j >= p.length) {
+            if (i >= s.length - 1 && j >= p.length - 1 && matchLen == s.length) matchable = true
+            return
+        }
+
+//        println("i = $i , s[i] = ${s[i].toString()} ,j = $j , p[j] = ${p[j].toString()} , matchLen = $matchLen")
+
+        if (i > s.length - 1) {
+            backTrack(s.length - 1, j + 2, s, p)
+        } else if (j > p.length - 1) {
+            if (p[p.length - 1].toString() == "*")
+                backTrack(i + 1, p.length - 2, s, p)
+            else
+                backTrack(i + 1, p.length - 1, s, p)
+        } else {
+            if (j < p.length - 1 && p[j + 1].toString() == "*") {
+                if (s[i] == p[j] || p[j].toString() == ".") {
+                    matchLen++
+                    backTrack(i + 1, j, s, p)
+                    backTrack(i, j + 2, s, p)
+                    matchLen--
+                } else {
+                    backTrack(i, j + 2, s, p)
+                }
+            } else {
+                if (s[i] == p[j] || p[j].toString() == ".") {
+                    matchLen++
+                    backTrack(i + 1, j + 1, s, p)
+                }
+            }
+        }
+    }
+
+    /**
+     * 动态规划
+     * 失败  把自己给绕糊涂了
+     *
+     */
+    fun dynamicProgram(s: String, p: String): Boolean {
+        //1.dp[i][j] 判断i长度的s和j长度的j 能匹配的s的长度
+        var dp = Array(s.length + 1) { IntArray(p.length + 1) }
+        dp[0][0] = 1
+        //2.初始值
+        for (i in s.indices) dp[i][0] = 0
+        for (i in p.indices) dp[0][i] = 0
+        //3.关系判断
+        //如果p的最后以为是字母
+        //如果p的最后一位是* -
+        //               最后第二位是字母/最后第二位是.
+        //如果p的最后一位是.
+//        for (i in 1 until s.length) {
+//            for (j in 1 until p.length) {
+//                if (p[j - 1].toString() == ".") {//p的最后一位为 .
+//                    dp[i][j] = dp[i - 1][j - 1]
+//                } else if (p[j - 1].toString() == "*") {//p 的最后一位 为 *
+//                    if (p[j - 2].toString() == ".") {
+//                        for (k in s.indices) {//说明只要任意长度的s能和长度为j-2的p匹配，后面的就能匹配
+//                            if (dp[k][j - 2]) {
+//                                dp[i][j] = true
+//                                break
+//                            }
+//                            dp[i][j] = false//否则不匹配
+//                        }
+//                    } else {
+//                        for1@ for (k in s.indices) {//说明只要任意长度的s能和长度为j-2的p匹配且剩余的s都是重复的p[J-2]，后面的就能匹配
+//                            if (dp[k][j - 2]) {
+//                                var charLast = s.substring(k, s.length)
+//                                for (n in charLast.indices) {
+//                                    if (charLast[n].toString() == p[j - 2].toString()) continue
+//                                    else {
+//                                        dp[i][j] = false
+//                                        break@for1
+//                                    }
+//                                }
+//                                dp[i][j] = true
+//                                break
+//                            }
+//                        }
+//                        dp[i][j] = false//否则不匹配
+//                    }
+//                } else
+//                    dp[i][j] = dp[i - 1][j - 1] && s[i - 1].toString() == p[j - 1].toString()
+//            }
+//        }
+
+        var i = 1
+        var j = 1
+        while (i <= s.length) {
+            while (j <= p.length) {
+                if (p[j - 1].toString() == ".") {//这种情况包括.  .*
+                    if (j < p.length && p[j].toString() == "*") {// .*
+                        var maxMatch = 0
+                        for (k in 0..i) {//说明只要任意长度的s能和长度为j-2的p匹配，后面的就能匹配
+                            maxMatch = k + 1
+                            dp[i][j] = maxMatch + dp[i - k][j - 1]
+                        }
+                        j += 2
+                    } else {// .
+                        dp[i][j] = dp[i - 1][j - 1] + 1
+                        j++
+                    }
+                } else {//这种情况包括 a  a*  即字母 和 字母*
+                    if (p[j].toString() == "*") {
+                        var maxMatch = 0
+                        for1@ for (k in 0..i) {//说明只要任意长度的s能和长度为j-2的p匹配且剩余的s都是重复的p[J-2]，后面的就能匹配
+                            var charLast = s.substring(k, i + 1)
+                            for (n in charLast.indices) {
+                                if (charLast[n].toString() == p[j - 1].toString()) {
+                                    maxMatch++
+                                    continue
+                                } else {
+                                    dp[i][j] = dp[i - k][j - 1] + maxMatch
+                                    break@for1
+                                }
+                            }
+                        }
+                        j += 2
+                    } else {
+                        if (s[i - 1].toString() == p[j - 1].toString())
+                            dp[i][j] = dp[i - 1][j - 1] + 1
+                        else dp[i][j] = dp[i - 1][j - 1]
+                        j++
+                    }
+                }
+            }
+            i++
+        }
+
+        return (dp[s.length][p.length] == s.length)
+    }
 }
 
 fun main(args: Array<String>) {
     var code = Code004()
-    println("-------------aa bcbcbcaccbc aa bc/.* a*aa* .* b* . c* .* a* ----")
-    println("${code.isMatch("aabcbcbcaccbcaabc", ".*a*aa*.*b*.c*.*a*")}")
-//    println("-------------a caa bb accbbacaa bbbb/a* .* b* .* a* a a* a* ----")
-//    println("${code.isMatch("acaabbaccbbacaabbbb", "a*.*b*.*a*aa*a*")}")
-//    println("-------------abcdede/ab.*de----")
-//    println("${code.isMatch("abcdede", "ab.*de")}")
+//    println("-------------aa bcbcbcaccbc aa bc/.* a*aa* .* b* . c* .* a* ----")
+//    code.backTrack(0, 0, "aabcbcbcaccbcaabc", ".*a*aa*.*b*.c*.*a*")
+//    println("${code.matchable}")
+//    println("${code.isMatch1("aabcbcbcaccbcaabc", ".*a*aa*.*b*.c*.*a*")}")
+////    println("-------------a caa bb accbbacaa bbbb/a* .* b* .* a* a a* a* ----")
+////    println("${code.isMatch("acaabbaccbbacaabbbb", "a*.*b*.*a*aa*a*")}")
+////    println("-------------abcdede/ab.*de----")
+////    println("${code.isMatch("abcdede", "ab.*de")}")
+////    println("-----------------")
+////    println("${code.isMatch("abc", ".")}")
 //    println("-----------------")
-//    println("${code.isMatch("abc", ".")}")
+//    println("${code.backTrack(0, 0, "ab", ".*..")}")
+//    println("${code.matchable}")
+//    println("${code.isMatch1("ab", ".*..")}")
+//    println("-----------------")
+////    println("${code.isMatch("abc", "c*")}")
+////    println("-----------------")
+//    println("${code.backTrack(0, 0, "aa", "a*")}")
+//    println("${code.matchable}")
+//    println("${code.isMatch1("aa", "a*")}")
     println("-----------------")
-//    println("${code.isMatch("ab", ".*..")}")
-//    println("-----------------")
-//    println("${code.isMatch("abc", "c*")}")
-//    println("-----------------")
-//    println("${code.isMatch("aa", "a*")}")
-//    println("-----------------")
 //    println("${code.isMatch("abc", "")}")
 //    println("-----------------")
 //    println("${code.isMatch("abc", "e*f*c")}")
 //    println("-----------------")
 //    println("${code.isMatch("abc", "e*a*c")}")
+//    println("${code.backTrack(0, 0, "aab", "c*a*b")}")
+//    println("${code.matchable}")
 //    println("${code.isMatch("aab", "c*a*b")}")//"aab" "c*a*b"
     println("-----------------")
 //    println("${code.isMatch("aa", "a*")}")//"aab" "c*a*b"
 //    println("-----------------")
+
+    //"mississippi"
+    //"mis*is*ip*."
+//    println("${code.backTrack(0, 0, "mississippi", "mis*is*ip*.")}")
+//    println("${code.matchable}")
 //    println(
 //        "${
 //            code.isMatch(
@@ -414,7 +566,8 @@ fun main(args: Array<String>) {
 //                "mis*is*ip*."
 //            )
 //        }"
-//    )//"mi ss i ss i pp i" "mi s* i s* i p* ."
+//    )
+    //"mi ss i ss i pp i" "mi s* i s* i p* ."
 //    println(
 //        "${
 //            code.isMatch(
@@ -426,7 +579,9 @@ fun main(args: Array<String>) {
 //////    println("-----------------")
 //    println("${code.isMatch("aaa", "a.a")}")//"aaa" "a.a"
 ////    println("-----------------")
-//    println("${code.isMatch("aa", "a*")}")//"aaa" "a.a"
+    println("${code.backTrack(0, 0, "a", "ab")}")
+    println("${code.matchable}")
+    println("${code.isMatch("a", "ab")}")//"aaa" "a.a"
 //    println("${code.isMatch("aa", ".")}")//"aaa" "a.a"
 //    println("${code.isMatch("abcd", "d*")}")//"aaa" "a.a"
 //    println("${code.isMatch("ab", ".*c")}")//"aaa" "a.a"
