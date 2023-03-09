@@ -2,6 +2,9 @@ package leetcode;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /***
@@ -28,7 +31,7 @@ import java.util.List;
  */
 public class Code012FourNumSum {
 
-    List<List<Integer>> list = new ArrayList<>();
+    static List<List<Integer>> list = new ArrayList<>();
 
     public List<List<Integer>> fourSum(int[] nums, int target) {
         algorithm1(0, nums, target);
@@ -38,6 +41,7 @@ public class Code012FourNumSum {
     StringBuffer stf = new StringBuffer("");
 
     int count = 0;
+
     void algorithm1(int i, int[] nums, int target) {
         if (count == 4) {
             System.out.println("i = " + i);
@@ -61,10 +65,60 @@ public class Code012FourNumSum {
 
     }
 
+    /**
+     * 动态规划  不行 pass
+     */
+    List<List<Integer>> dynamic(int[] nums, int target) {
+        int[] dp = new int[nums.length];
+        //1.dp[i] 表示i个数的和
+        //2.初始值
+        dp[0] = 0;
+        //3.规律
+        //dp[i]的和就是求dp[i - 1] + nus[i - 1]
+
+        return list;
+    }
+
+    /**
+     * 回溯法
+     * 超时
+     * @return
+     */
+    int counts = 0;
+
+    void part(int i, int[] nums, int target, List<Integer> integers) {
+        if (counts == 4) {
+            if (target == 0) {
+                List<Integer> integerList = new ArrayList<>();
+                integerList.addAll(integers);
+                if (!list.contains(integerList))
+                {
+                    list.add(integerList);
+                }
+            }
+            return;
+        }
+
+        for (int j = i; j < nums.length; j++) {
+            integers.add(nums[j]);
+            counts++;
+            part(j + 1, nums, target - nums[j], integers);
+            integers.remove(counts - 1);
+            counts--;
+        }
+    }
+
+
     public static void main(String[] args) {
         Code012FourNumSum code = new Code012FourNumSum();
 
-        int [] a = {2,2,2,2,2};
-        code.fourSum(a,8);
+        list.clear();
+        //[-5,5,4,-3,0,0,4,-2]
+        //4
+        int[] a = {-5,5,4,-3,0,0,4,-2};
+        Arrays.sort(a);
+
+        code.part(0, a, 4, new ArrayList<Integer>());
+        System.out.println(code.list);
     }
 }
