@@ -428,95 +428,65 @@ class Code004 {
      */
     fun dynamicProgram(s: String, p: String): Boolean {
         //1.dp[i][j] 判断i长度的s和j长度的j 能匹配的s的长度
-        var dp = Array(s.length + 1) { IntArray(p.length + 1) }
-        dp[0][0] = 1
+        var dp = Array(s.length + 1) { BooleanArray(p.length + 1) }
         //2.初始值
-        for (i in s.indices) dp[i][0] = 0
-        for (i in p.indices) dp[0][i] = 0
+        dp[0][0] = true
+        dp[0][1] = false  // “” 和 “a”这种任意字符或者"." 都无法匹配
+        for (i in 1..s.length) dp[i][0] = false
+        var index = 2;
+        while (index <= p.length) {
+            if (p[index - 1].toString() == "*") {
+                dp[0][index] = true && dp[0][index - 2]
+            }
+            index += 2
+        }
         //3.关系判断
         //如果p的最后以为是字母
         //如果p的最后一位是* -
         //               最后第二位是字母/最后第二位是.
         //如果p的最后一位是.
-//        for (i in 1 until s.length) {
-//            for (j in 1 until p.length) {
-//                if (p[j - 1].toString() == ".") {//p的最后一位为 .
-//                    dp[i][j] = dp[i - 1][j - 1]
-//                } else if (p[j - 1].toString() == "*") {//p 的最后一位 为 *
-//                    if (p[j - 2].toString() == ".") {
-//                        for (k in s.indices) {//说明只要任意长度的s能和长度为j-2的p匹配，后面的就能匹配
-//                            if (dp[k][j - 2]) {
-//                                dp[i][j] = true
-//                                break
-//                            }
-//                            dp[i][j] = false//否则不匹配
-//                        }
-//                    } else {
-//                        for1@ for (k in s.indices) {//说明只要任意长度的s能和长度为j-2的p匹配且剩余的s都是重复的p[J-2]，后面的就能匹配
-//                            if (dp[k][j - 2]) {
-//                                var charLast = s.substring(k, s.length)
-//                                for (n in charLast.indices) {
-//                                    if (charLast[n].toString() == p[j - 2].toString()) continue
-//                                    else {
-//                                        dp[i][j] = false
-//                                        break@for1
-//                                    }
-//                                }
-//                                dp[i][j] = true
-//                                break
-//                            }
-//                        }
-//                        dp[i][j] = false//否则不匹配
-//                    }
-//                } else
-//                    dp[i][j] = dp[i - 1][j - 1] && s[i - 1].toString() == p[j - 1].toString()
-//            }
-//        }
 
         var i = 1
-        var j = 1
         while (i <= s.length) {
+            var j = if (p.length >= 2 && p[1].toString() == "*") 2 else 1
             while (j <= p.length) {
-                if (p[j - 1].toString() == ".") {//这种情况包括.  .*
-                    if (j < p.length && p[j].toString() == "*") {// .*
-                        var maxMatch = 0
+                if (p[j - 1].toString() == ".") {//p的最后一位为 .
+                    dp[i][j] = dp[i - 1][j - 1]
+                } else if (p[j - 1].toString() == "*") {//p 的最后一位 为 *
+                    if (p[j - 2].toString() == ".") {
                         for (k in 0..i) {//说明只要任意长度的s能和长度为j-2的p匹配，后面的就能匹配
-                            maxMatch = k + 1
-                            dp[i][j] = maxMatch + dp[i - k][j - 1]
+                            if (dp[k][j - 2]) {
+                                dp[i][j] = true
+                                break
+                            }
+                            dp[i][j] = false//否则不匹配
                         }
-                        j += 2
-                    } else {// .
-                        dp[i][j] = dp[i - 1][j - 1] + 1
-                        j++
-                    }
-                } else {//这种情况包括 a  a*  即字母 和 字母*
-                    if (p[j].toString() == "*") {
-                        var maxMatch = 0
+                    } else {
                         for1@ for (k in 0..i) {//说明只要任意长度的s能和长度为j-2的p匹配且剩余的s都是重复的p[J-2]，后面的就能匹配
-                            var charLast = s.substring(k, i + 1)
-                            for (n in charLast.indices) {
-                                if (charLast[n].toString() == p[j - 1].toString()) {
-                                    maxMatch++
-                                    continue
-                                } else {
-                                    dp[i][j] = dp[i - k][j - 1] + maxMatch
-                                    break@for1
+                            if (dp[k][j - 2]) {
+                                var charLast = s.substring(k, i)
+                                for (n in charLast.indices) {
+                                    if (charLast[n].toString() == p[j - 2].toString()) continue
+                                    else {
+                                        dp[i][j] = false
+                                        continue@for1
+                                    }
                                 }
+                                dp[i][j] = true
+                                break
                             }
                         }
-                        j += 2
-                    } else {
-                        if (s[i - 1].toString() == p[j - 1].toString())
-                            dp[i][j] = dp[i - 1][j - 1] + 1
-                        else dp[i][j] = dp[i - 1][j - 1]
-                        j++
                     }
-                }
+                } else
+                    dp[i][j] = dp[i - 1][j - 1] && s[i - 1].toString() == p[j - 1].toString()
+
+                if (j + 1 <= p.length - 1 && p[j + 1].toString() == "*") j += 2
+                else j++
             }
             i++
         }
 
-        return (dp[s.length][p.length] == s.length)
+        return (dp[s.length][p.length])
     }
 }
 
@@ -529,19 +499,21 @@ fun main(args: Array<String>) {
 ////    println("-------------a caa bb accbbacaa bbbb/a* .* b* .* a* a a* a* ----")
 ////    println("${code.isMatch("acaabbaccbbacaabbbb", "a*.*b*.*a*aa*a*")}")
 ////    println("-------------abcdede/ab.*de----")
-////    println("${code.isMatch("abcdede", "ab.*de")}")
-////    println("-----------------")
+
+    println("${code.dynamicProgram("abcdede", "ab.*de")}")
+    println("${code.isMatch1("abcdede", "ab.*de")}")
+    println("-----------------")
 ////    println("${code.isMatch("abc", ".")}")
 //    println("-----------------")
 //    println("${code.backTrack(0, 0, "ab", ".*..")}")
 //    println("${code.matchable}")
-//    println("${code.isMatch1("ab", ".*..")}")
+    println("${code.dynamicProgram("ab", ".*..")}")
+    println("${code.isMatch1("ab", ".*..")}")
 //    println("-----------------")
 ////    println("${code.isMatch("abc", "c*")}")
 ////    println("-----------------")
-//    println("${code.backTrack(0, 0, "aa", "a*")}")
-//    println("${code.matchable}")
-//    println("${code.isMatch1("aa", "a*")}")
+    println("${code.dynamicProgram("aa", "a*")}")
+    println("${code.isMatch1("aa", "a*")}")
     println("-----------------")
 //    println("${code.isMatch("abc", "")}")
 //    println("-----------------")
@@ -557,16 +529,16 @@ fun main(args: Array<String>) {
 
     //"mississippi"
     //"mis*is*ip*."
-//    println("${code.backTrack(0, 0, "mississippi", "mis*is*ip*.")}")
+    println("${code.dynamicProgram("mississippi", "mis*is*ip*.")}")
 //    println("${code.matchable}")
-//    println(
-//        "${
-//            code.isMatch(
-//                "mississippi",
-//                "mis*is*ip*."
-//            )
-//        }"
-//    )
+    println(
+        "${
+            code.isMatch1(
+                "mississippi",
+                "mis*is*ip*."
+            )
+        }"
+    )
     //"mi ss i ss i pp i" "mi s* i s* i p* ."
 //    println(
 //        "${
@@ -579,12 +551,19 @@ fun main(args: Array<String>) {
 //////    println("-----------------")
 //    println("${code.isMatch("aaa", "a.a")}")//"aaa" "a.a"
 ////    println("-----------------")
-    println("${code.backTrack(0, 0, "a", "ab")}")
-    println("${code.matchable}")
-    println("${code.isMatch("a", "ab")}")//"aaa" "a.a"
-//    println("${code.isMatch("aa", ".")}")//"aaa" "a.a"
-//    println("${code.isMatch("abcd", "d*")}")//"aaa" "a.a"
-//    println("${code.isMatch("ab", ".*c")}")//"aaa" "a.a"
+//    println("${code.backTrack(0, 0, "a", "ab")}")
+//    println("${code.matchable}")
+//    println("${code.dynamicProgram( "av", "aa")}")
+//    println("${code.isMatch("av", "aa")}")//"aaa" "a.a"
+    println("${code.dynamicProgram( "aa", ".")}")
+    println("${code.isMatch1("aa", ".")}")//"aaa" "a.a"
+    println("-----------------")
+    println("${code.dynamicProgram( "abcd", "d*")}")
+    println("${code.isMatch("abcd", "d*")}")//"aaa" "a.a"
+    println("-----------------")
+    println("${code.dynamicProgram( "ab", ".*c")}")
+    println("${code.isMatch("ab", ".*c")}")//"aaa" "a.a"
+    println("-----------------")
 
 
 }
