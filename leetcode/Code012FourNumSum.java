@@ -75,6 +75,9 @@ public class Code012FourNumSum {
         dp[0] = 0;
         //3.规律
         //dp[i]的和就是求dp[i - 1] + nus[i - 1]
+        for (int i = 1; i <= nums.length; i++) {
+
+        }
 
         return list;
     }
@@ -82,30 +85,51 @@ public class Code012FourNumSum {
     /**
      * 回溯法
      * 超时
+     * 通过了，屎一样的算法，看来只是知道了回溯，也不一定能写出完美的算法。
      * @return
      */
     int counts = 0;
 
     void part(int i, int[] nums, int target, List<Integer> integers) {
+
         if (counts == 4) {
             if (target == 0) {
                 List<Integer> integerList = new ArrayList<>();
                 integerList.addAll(integers);
-                if (!list.contains(integerList))
-                {
+                if (!list.contains(integerList)) {
                     list.add(integerList);
                 }
             }
             return;
         }
 
-        for (int j = i; j < nums.length; j++) {
-            integers.add(nums[j]);
-            counts++;
-            part(j + 1, nums, target - nums[j], integers);
-            integers.remove(counts - 1);
-            counts--;
+        int jEnd = nums.length - 3 + counts;
+        for (int j = i; j < jEnd; j++) {
+            if (nums[j] > target && nums[j] > 0) return;//最小值直接大于target 没必须继续了
+            if (j > i && nums[j] == nums[i]) continue;//去除重复的选择
+            int large = nums[j];
+            int end = 3 - counts;
+            for (int k = 0; k < end; k++) {
+                large += nums[nums.length - k - 1];
+                if (large >= target) break;
+            }
+
+            if (large >= target) {
+                integers.add(nums[j]);
+                counts++;
+                part(j + 1, nums, target - nums[j], integers);
+                integers.remove(counts - 1);
+                counts--;
+            }
+
         }
+    }
+
+    /**
+     * 分治法
+     */
+    void divideAndConquer(int[] nums, int target, List<Integer> integers) {
+
     }
 
 
@@ -115,10 +139,15 @@ public class Code012FourNumSum {
         list.clear();
         //[-5,5,4,-3,0,0,4,-2]
         //4
-        int[] a = {-5,5,4,-3,0,0,4,-2};
+        int[] aa = {-5, 5, 4, -3, 0, 0, 4, -2};
+        //[1000000000,1000000000,1000000000,1000000000]
+        //-294967296
+        int[] aaa = {1000000000, 1000000000, 1000000000, 1000000000};
+        int[] a = {0, 0, 0, 1000000000, 1000000000, 1000000000, 1000000000};
         Arrays.sort(a);
 
-        code.part(0, a, 4, new ArrayList<Integer>());
+        code.part(0, aaa, -294967296, new ArrayList<Integer>());
         System.out.println(code.list);
+
     }
 }
